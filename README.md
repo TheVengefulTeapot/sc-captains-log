@@ -14,6 +14,15 @@ Built as a local-first desktop tool for logging player interactions, kills, deat
 - Local settings and organisation customisation
 - Windows installer and portable build support
 
+## Planned Features
+
+- Game log monitoring and event confirmation prompts where supported by available Star Citizen logging
+- Import/export support for organisation records and log
+- Optional self-hosted database backend for organisation-wide records
+- Discord bot integration for querying player dossiers, activity logs, and stats within org Discord servers
+- Role-based access controls for shared org data
+- Sync support between local app data and the hosted backend
+
 ## Built With
 
 - Electron
