@@ -1,0 +1,34 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+out/
+
+# Electron Builder generated files
+builder-debug.yml
+builder-effective-config.yaml
+*.blockmap
+*.exe
+*.msi
+*.dmg
+*.AppImage
+
+# Local config / secrets
+.env
+.env.*
+config.local.*
+*.local.json
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS/editor junk
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
