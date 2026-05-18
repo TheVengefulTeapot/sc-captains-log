@@ -1,6 +1,11 @@
 {
+<<<<<<< HEAD
   "name": "sc-captains-log",
   "version": "1.0.1",
+=======
+  "name": "cs-captains-log",
+  "version": "1.0.0",
+>>>>>>> 0e861b8618a7ccd0df87d86340608b098a9d78ae
   "description": "Electron-based activity tracker and captain's log for Star Citizen organisations",
   "main": "main.js",
   "author": "The Vengeful Teapot",
@@ -10,9 +15,15 @@
     "build-portable": "electron-builder --win portable"
   },
   "build": {
+<<<<<<< HEAD
     "appId": "com.sc.captainslog",
     "productName": "SC Captains Log",
     "copyright": "The Vengeful Teapot",
+=======
+    "appId": "com.crosssection.captainslog",
+    "productName": "CS Captain's Log",
+    "copyright": "Cross Section Org",
+>>>>>>> 0e861b8618a7ccd0df87d86340608b098a9d78ae
     "directories": {
       "output": "dist"
     },
@@ -42,17 +53,28 @@
       "installerHeaderIcon": "assets/icon.ico",
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
+<<<<<<< HEAD
       "shortcutName": "SC Captains Log",
       "runAfterFinish": true,
       "deleteAppDataOnUninstall": false,
       "include": "build/installer.nsh"
+=======
+      "shortcutName": "CS Captain's Log",
+      "runAfterFinish": true,
+      "deleteAppDataOnUninstall": false
+>>>>>>> 0e861b8618a7ccd0df87d86340608b098a9d78ae
     },
     "files": [
       "main.js",
       "preload.js",
       "src/**/*",
       "assets/**/*"
+<<<<<<< HEAD
     ]
+=======
+    ],
+    "artifactName": "${productName} ${version}.${ext}"
+>>>>>>> 0e861b8618a7ccd0df87d86340608b098a9d78ae
   },
   "devDependencies": {
     "electron": "^28.0.0",
