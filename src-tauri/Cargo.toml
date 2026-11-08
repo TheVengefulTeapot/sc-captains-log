@@ -1,0 +1,27 @@
+[package]
+name = "sc-captains-log"
+version = "1.1.0"
+description = "Activity tracker and captain's log for Star Citizen"
+authors = ["The Vengeful Teapot"]
+edition = "2021"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-dialog = "2"
+tauri-plugin-opener = "2"
+tauri-plugin-single-instance = "2"
+serde_json = { version = "1", features = ["preserve_order"] }
+# The same Rust code the Electron build uses, without the Node bindings.
+cl_native = { path = "../native/core", default-features = false, features = ["plain"] }
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.59", features = ["Win32_Foundation", "Win32_UI_WindowsAndMessaging", "Win32_UI_Shell"] }
+
+[profile.release]
+opt-level = "s"
+lto = true
+strip = true
+codegen-units = 1

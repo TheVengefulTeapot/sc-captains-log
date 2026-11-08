@@ -75,3 +75,14 @@ Depending on the version/build history, older test installs may have used `%APPD
 Source code should live in this repository.
 
 Compiled `.exe` files should be attached to GitHub Releases rather than committed directly to the repository.
+## Building (1.1.0+)
+
+The app is a Tauri app: the interface in `src/` runs in Windows' built-in WebView2, and the work behind it is Rust.
+
+- `native/core/` holds the Rust logic: save file and backups (`store.rs`), UEX prices and ship list (`market.rs`), RSI handle checks (`rsi.rs`), and the Game.log reader (`gamelog.rs`).
+- `src-tauri/` is the app shell: the window, and the commands the page calls. `src/tauri-bridge.js` exposes those commands to the page as `window.electronAPI`.
+- Build the installer with `npx tauri build`. It goes to `src-tauri/target/release/bundle/nsis/`. This needs the Rust toolchain and the Visual Studio C++ build tools; people installing the app need neither.
+
+User data stays in `%APPDATA%\SC Captain's Log\` (`captains-log.json`, the previous save, and daily backups in `backups\`).
+
+The older Electron build (`main.js`, `preload.js` and the `.js` modules next to them) still works with `npm start`. Run `npm run build-native` first to build the Rust module it uses, or it falls back to its JavaScript versions.

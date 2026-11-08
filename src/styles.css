@@ -117,8 +117,10 @@ body::after{content:'';position:fixed;inset:0;background:var(--theme-scanlines);
 .m-ramming{background:#181008;color:#a06020;border:1px solid #402008}
 .m-other{background:#181414;color:#808080;border:1px solid #3a2a2a}
 .m-fps{background:#0a180a;color:#40c040;border:1px solid #104010}
-.flagged-badge{font-size:10px;font-family:var(--mono);padding:1px 6px;border-radius:2px;background:#3a0808;color:#ff4040;border:1px solid #8a1010;flex-shrink:0;animation:pulse 1.5s infinite}
-.threat-badge{font-size:10px;font-family:var(--mono);padding:1px 6px;border-radius:2px;background:#3a1a00;color:#ff8020;border:1px solid #8a4000;flex-shrink:0;animation:pulse 1.5s infinite}
+.flagged-badge{font-size:10px;font-family:var(--mono);padding:1px 6px;border-radius:2px;background:#3a0808;color:#ff4040;border:1px solid #8a1010;flex-shrink:0;animation:pulse 1.5s steps(22) infinite}
+.threat-badge{font-size:10px;font-family:var(--mono);padding:1px 6px;border-radius:2px;background:#3a1a00;color:#ff8020;border:1px solid #8a4000;flex-shrink:0;animation:pulse 1.5s steps(22) infinite}
+/* Looping animations run at 30 frames a second, not the screen's 60+:
+   steps(n) on each half of a pulse, n = half the duration x 30. */
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 .profit-badge{font-size:10px;font-family:var(--mono);padding:1px 6px;border-radius:2px;flex-shrink:0}
 .profit-pos{background:#0a1e0a;color:#28c870;border:1px solid #104a10}
@@ -169,8 +171,8 @@ body::after{content:'';position:fixed;inset:0;background:var(--theme-scanlines);
 .cat-trusted-b{background:#081a08;color:#20a050;border:1px solid #0a3a10}
 .cat-friendly-b{background:#081828;color:#4488dd;border:1px solid #1a3060}
 .cat-neutral-b{background:#181818;color:#888888;border:1px solid #444444}
-.cat-hostile-b{background:#1e0e00;color:#c05000;border:1px solid #602800;animation:pulse 2s infinite}
-.cat-highthreat-b{background:#1a0606;color:#a01818;border:1px solid #4a0808;animation:pulse 1.2s infinite}
+.cat-hostile-b{background:#1e0e00;color:#c05000;border:1px solid #602800;animation:pulse 2s steps(30) infinite}
+.cat-highthreat-b{background:#1a0606;color:#a01818;border:1px solid #4a0808;animation:pulse 1.2s steps(18) infinite}
 .pc-met{font-size:12px;color:var(--mut);margin-top:4px}
 .pc-interactions{font-size:11px;color:var(--accD);font-family:var(--mono);margin-top:6px}
 /* MINING */
@@ -341,3 +343,117 @@ input:focus, select:focus, textarea:focus{
 #v-ptrade .pt-item-row .add-btn {
   height:32px;
 }
+
+/* LIVE LOG */
+.gl-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--mut);margin-right:6px;vertical-align:middle;flex-shrink:0}
+.gl-dot.on{background:var(--grn);box-shadow:0 0 6px var(--grn);animation:glPulse 2s steps(30) infinite}
+.gl-dot.warn{background:var(--amber)}
+.gl-dot.err{background:var(--red)}
+@keyframes glPulse{0%,100%{opacity:1}50%{opacity:.45}}
+.gl-status-card{padding:10px 14px}
+.gl-status-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.gl-status-text{font-family:var(--mono);font-size:11px;color:var(--txt);letter-spacing:1px;text-transform:uppercase}
+.gl-path{font-family:var(--mono);font-size:10px;color:var(--mut);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:420px}
+.gl-session-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.gl-session-grid .full{grid-column:1/-1}
+.gl-list{display:flex;flex-direction:column;gap:5px;max-height:460px;overflow-y:auto}
+.gl-row{display:flex;align-items:flex-start;gap:8px;padding:6px 10px;background:var(--bg);border:1px solid var(--brd);border-left:3px solid var(--brd);border-radius:var(--radius);font-size:12px}
+.gl-row .gl-time{font-family:var(--mono);font-size:10px;color:var(--mut);flex-shrink:0;padding-top:1px}
+.gl-row .gl-body{flex:1;min-width:0;word-break:break-word}
+.gl-row .gl-sub{font-family:var(--mono);font-size:10px;color:var(--mut);margin-top:2px}
+.gl-row.st-active{border-left-color:var(--acc)}
+.gl-row.st-complete{border-left-color:var(--grn)}
+.gl-row.st-failed{border-left-color:var(--red)}
+.gl-row.st-abandoned{border-left-color:var(--amber)}
+.gl-row.ev-payout{border-left-color:var(--grn)}
+.gl-row.ev-party{border-left-color:#4488dd}
+.gl-row.ev-ship{border-left-color:#c060ff}
+.gl-badge{font-family:var(--mono);font-size:9px;padding:1px 6px;border-radius:2px;border:1px solid var(--brd);color:var(--mut);letter-spacing:1px;text-transform:uppercase;flex-shrink:0}
+.gl-badge.st-active{color:var(--acc);border-color:var(--acc)}
+.gl-badge.st-complete{color:var(--grn);border-color:var(--grn)}
+.gl-badge.st-failed{color:var(--red);border-color:var(--red)}
+.gl-badge.st-abandoned{color:var(--amber);border-color:var(--amber)}
+#st-gamelog .fg{grid-template-columns:1fr}
+.gl-check{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;color:var(--txt);cursor:pointer}
+.gl-note{margin-top:14px;padding:10px 12px;border:1px solid var(--brd);border-radius:var(--radius);font-size:12px;color:var(--mut);line-height:1.5}
+.gl-badge.gl-bounty{color:#c060ff;border-color:#c060ff}
+.gl-price{font-family:var(--mono);font-size:11px;color:var(--red);flex-shrink:0;padding-top:1px}
+.gl-row.gl-known{border-left-color:var(--acc)}
+.gl-row.gl-known.cat-hostile,.gl-row.gl-known.cat-highthreat{border-left-color:var(--red);background:#1e0a0a}
+.gl-row.gl-known.cat-orgmate,.gl-row.gl-known.cat-trusted,.gl-row.gl-known.cat-friendly{border-left-color:var(--grn)}
+.gl-seen-tag{font-family:var(--mono);font-size:10px;color:var(--grn);letter-spacing:1px;margin-top:4px}
+.player-card.gl-seen{box-shadow:0 0 0 1px var(--grn),0 0 10px rgba(40,200,112,.25)}
+.player-card.gl-seen.cat-hostile,.player-card.gl-seen.cat-highthreat{box-shadow:0 0 0 1px var(--red),0 0 12px rgba(224,48,48,.4)}
+.player-card.gl-seen.cat-hostile .gl-seen-tag,.player-card.gl-seen.cat-highthreat .gl-seen-tag{color:var(--red)}
+
+/* RSI HANDLE CHECK */
+.hc-status{font-family:var(--mono);font-size:10px;color:var(--mut);letter-spacing:.5px;line-height:1.6;min-height:0}
+.hc-status:empty{display:none}
+.hc-status.checking{color:var(--mut)}
+.hc-status.ok{color:var(--grn)}
+.hc-status.ok a{color:var(--grn);text-decoration:underline}
+.hc-status.bad{color:var(--amber)}
+.hc-chip{background:transparent;border:1px solid var(--brd);border-radius:var(--radius);color:var(--txt);font-family:var(--mono);font-size:10px;padding:1px 7px;margin:2px 4px 0 0;cursor:pointer}
+.hc-chip:hover{border-color:var(--acc);color:var(--acc)}
+.hc-chip.known{border-color:var(--grn);color:var(--grn)}
+.hc-chip.now{border-color:var(--grn);color:var(--bg);background:var(--grn)}
+.hc-seen{color:var(--acc)}
+
+/* PARTIES */
+.gl-party-stats{display:flex;flex-wrap:wrap;gap:6px 14px;font-family:var(--mono);font-size:11px;color:var(--txt);margin-bottom:8px}
+.gl-members{display:flex;flex-wrap:wrap;gap:5px}
+.gl-member{font-family:var(--mono);font-size:11px;padding:2px 8px;border:1px solid var(--brd);border-radius:var(--radius);color:var(--txt)}
+.gl-member.gone{opacity:.45;text-decoration:line-through}
+.gl-member.cat-hostile,.gl-member.cat-highthreat{border-color:var(--red);color:var(--red)}
+.gl-member.cat-orgmate,.gl-member.cat-trusted,.gl-member.cat-friendly{border-color:var(--grn);color:var(--grn)}
+.gl-party-sect{font-family:var(--mono);font-size:10px;color:var(--acc);letter-spacing:1px;text-transform:uppercase;margin:10px 0 4px}
+.gl-share{display:flex;align-items:baseline;gap:6px;font-size:12px;padding:2px 0;color:var(--mut)}
+.gl-share.taken{color:var(--txt)}
+.gl-share.taken>span:first-child{color:var(--grn)}
+.gl-party-row{align-items:stretch}
+.gl-party-list{max-height:200px;overflow-y:auto;padding-right:4px}
+.gl-share.taken>.gl-badge{flex-shrink:0}
+
+/* MARKET */
+.mkt-bar{display:flex;gap:10px;margin-bottom:10px;align-items:flex-start}
+.mkt-route{font-size:12px;padding:8px 10px;margin-bottom:10px;border:1px solid var(--brd);border-left:3px solid var(--grn);border-radius:var(--radius);background:var(--bg)}
+.mkt-price{font-family:var(--mono);font-size:12px;color:var(--txt);flex-shrink:0;text-align:right;padding-top:1px}
+.mkt-trend{display:block;font-size:9px}
+.mkt-trend.good{color:var(--grn)}.mkt-trend.bad{color:var(--amber)}
+.mkt-row.stale{opacity:.55}
+.mkt-suggest{color:var(--txt)}
+
+/* TRADE RUNS */
+.run-filters{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.run-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:8px}
+.run-card{background:var(--bg);border:1px solid var(--brd);border-radius:var(--radius);padding:10px 12px;cursor:pointer;transition:border-color .15s}
+.run-card:hover{border-color:var(--acc)}
+.run-top{display:flex;align-items:baseline;gap:8px}
+.run-rank{font-family:var(--mono);font-size:10px;color:var(--mut)}
+.run-profit{margin-left:auto;font-family:var(--mono);font-size:14px;font-weight:600;color:var(--grn)}
+.run-track{height:6px;background:var(--brd);border-radius:3px;margin:6px 0;overflow:hidden}
+.run-fill{height:100%;background:var(--acc);border-radius:3px}
+.run-route{font-size:12px;color:var(--txt);margin-bottom:3px}
+/* PRICE CHARTS */
+.mkt-chart{min-height:170px}
+.mkt-legend{display:flex;flex-wrap:wrap;gap:4px 12px;margin-bottom:4px}
+.mkt-key{font-size:11px;color:var(--txt);display:flex;align-items:center;gap:5px}
+.mkt-key i,.mkt-tip i{display:inline-block;width:10px;height:3px;border-radius:2px}
+.mkt-plot{position:relative}
+.mkt-svg{display:block;overflow:visible}
+.mkt-grid{stroke:var(--brd);stroke-width:1}
+.mkt-axis{fill:var(--mut);font-family:var(--mono);font-size:9px}
+.mkt-label{fill:var(--txt);font-size:10px}
+.mkt-dot{stroke:var(--card);stroke-width:2}
+.mkt-cross{stroke:var(--mut);stroke-width:1;stroke-dasharray:3 3}
+.mkt-tip{position:absolute;pointer-events:none;background:var(--surf);border:1px solid var(--brd);border-radius:var(--radius);padding:6px 8px;font-size:11px;color:var(--txt);white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,.3);z-index:5}
+.mkt-tip div{display:flex;align-items:center;gap:5px}
+.mkt-tip-date{color:var(--mut);font-family:var(--mono);font-size:10px;margin-bottom:3px}
+@media (max-width:700px){.run-filters{grid-template-columns:1fr 1fr}}
+.mkt-key{background:none;border:1px solid transparent;border-radius:var(--radius);padding:1px 6px;cursor:pointer;font-family:inherit}
+.mkt-key:hover{border-color:var(--brd)}
+.mkt-key.off{color:var(--mut);text-decoration:line-through}
+.mkt-key.off i{opacity:.3}
+
+/* DEATH DETECTION */
+.dd-badge{display:inline-block;min-width:16px;padding:0 4px;margin-left:4px;border-radius:8px;background:var(--red);color:#fff;font-size:9px;line-height:16px;text-align:center}

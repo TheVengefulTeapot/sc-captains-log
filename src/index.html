@@ -69,7 +69,7 @@
   <div class="stat-div"></div>
   <div class="stat"><span class="sv death" id="st-deaths">0</span><span class="sl">Deaths</span></div>
   <div class="stat-div"></div>
-  <div class="stat"><span class="sv kd" id="st-kd">0.00</span><span class="sl">K/D</span></div>
+  <div class="stat"><span class="sv kd" id="st-kd">0.00</span><span class="sl" title="Player kills ÷ deaths caused by players">PvP K/D</span></div>
   <div class="stat-div"></div>
   <div class="stat"><span class="sv" id="st-caps">0</span><span class="sl">Captures</span></div>
   <div class="stat-div"></div>
@@ -93,6 +93,8 @@
   <div class="nav-div"></div>
   <button class="nb" onclick="showTab('players')" id="t-players">Players</button>
   <button class="nb" onclick="showTab('career')" id="t-career">Career</button>
+  <div class="nav-div"></div>
+  <button class="nb" onclick="showTab('live')" id="t-live"><span class="gl-dot" id="gl-nav-dot"></span>Live Log</button>
 </div>
 
 <div class="main">
@@ -109,7 +111,7 @@
       <div class="fg3">
         <div class="fgg ac-wrap"><label>Target Pilot</label><input id="k-pilot" placeholder="Their handle..." autocomplete="off" oninput="acFilter('k-pilot','kpilot-ac',playerNames())"/><div class="ac-list" id="kpilot-ac"></div></div>
         <div class="fgg"><label>Org / Affiliation</label><input id="k-org" placeholder="Org tag..."/></div>
-        <div class="fgg ac-wrap"><label>Ship Destroyed</label><input id="k-ship" placeholder="e.g. Gladius..." autocomplete="off" oninput="acFilter('k-ship','kship-ac',SHIP_LIST)"/><div class="ac-list" id="kship-ac"></div></div>
+        <div class="fgg ac-wrap"><label>Ship Destroyed</label><input id="k-ship" placeholder="e.g. Gladius..." autocomplete="off" oninput="acFilter('k-ship','kship-ac',SHIP_LIST,shipMaker);autoShipClass('k-ship','k-sclass')"/><div class="ac-list" id="kship-ac"></div></div>
         <div class="fgg"><label>Ship Class</label><select id="k-sclass"><option value="fighter">Fighter</option><option value="industrial">Industrial</option><option value="freighter">Freighter</option><option value="transport">Transport</option><option value="explorer">Explorer</option><option value="unknown">Unknown</option><option value="other">Other</option></select></div>
         <div class="fgg"><label>Kill Method</label><select id="k-method"><option value="dogfight">Dogfight</option><option value="boarding">Boarding</option><option value="ambush">Ambush</option><option value="ramming">Ramming</option><option value="other">Other</option></select></div>
         <div class="fgg ac-wrap"><label>Location</label><input id="k-loc" placeholder="System / area..." autocomplete="off" onfocus="acFocus('k-loc','k-loc-ac',LOCATIONS)" oninput="acFilter('k-loc','k-loc-ac',LOCATIONS)"/><div class="ac-list" id="k-loc-ac"></div></div>
@@ -127,7 +129,7 @@
         <div class="fgg full"><label>Notes</label><textarea id="kf-notes" placeholder="How it went down..."></textarea></div>
       </div>
     </div>
-    <div style="margin-top:12px"><button class="btn-p kill" onclick="submitKill()">Confirm Kill</button></div>
+    <div style="margin-top:12px"><button class="btn-p kill" id="kill-submit" onclick="submitKill()">Confirm Kill</button> <button class="btn-s" id="kill-cancel" onclick="cancelKillEdit()" style="display:none">Cancel edit</button></div>
   </div>
   <div class="fc" style="padding:12px 14px">
     <div class="fc-title" style="margin-bottom:10px;display:flex;align-items:center;justify-content:space-between">// Kill log <span id="kill-count" style="color:var(--mut);font-size:10px"></span><span style="font-family:var(--mono);font-size:10px;color:var(--accD);letter-spacing:1px" id="st-topmethod"></span></div>
@@ -152,7 +154,7 @@
   <div class="fc">
     <div class="fc-title">// Log a capture</div>
     <div class="fg">
-      <div class="fgg ac-wrap"><label>Ship Name</label><input id="c-ship" placeholder="e.g. Caterpillar..." autocomplete="off" oninput="acFilter('c-ship','cship-ac',SHIP_LIST)"/><div class="ac-list" id="cship-ac"></div></div>
+      <div class="fgg ac-wrap"><label>Ship Name</label><input id="c-ship" placeholder="e.g. Caterpillar..." autocomplete="off" oninput="acFilter('c-ship','cship-ac',SHIP_LIST,shipMaker);autoShipClass('c-ship','c-class')"/><div class="ac-list" id="cship-ac"></div></div>
       <div class="fgg"><label>Ship Class</label><select id="c-class"><option value="freighter">Freighter</option><option value="transport">Transport</option><option value="fighter">Fighter</option><option value="explorer">Explorer</option><option value="other">Other</option></select></div>
       <div class="fgg ac-wrap"><label>Location</label><input id="c-loc" placeholder="System / area..." autocomplete="off" onfocus="acFocus('c-loc','c-loc-ac',LOCATIONS)" oninput="acFilter('c-loc','c-loc-ac',LOCATIONS)"/><div class="ac-list" id="c-loc-ac"></div></div>
       <div class="fgg ac-wrap"><label>Crew / Assists</label><input id="c-crew" placeholder="Who helped..." autocomplete="off" oninput="acFilter('c-crew','ccrew-ac',playerNames())"/><div class="ac-list" id="ccrew-ac"></div></div>
@@ -191,6 +193,10 @@
 
 <!-- DEATHS -->
 <div id="v-deaths" style="display:none">
+  <div class="fc" id="dd-card" style="display:none">
+    <div class="fc-title" style="display:flex;justify-content:space-between">// Detected deaths <span id="dd-count" style="color:var(--mut);font-size:10px"></span></div>
+    <div class="gl-list" id="dd-list"></div>
+  </div>
   <div class="fc">
     <div class="fc-title">// Log a death</div>
     <div class="toggle-row">
@@ -204,9 +210,9 @@
     </div>
     <div id="d-pvpship-fields">
       <div class="fg">
-        <div class="fgg ac-wrap"><label>Ship Lost</label><input id="dp-ship" placeholder="Your ship..." autocomplete="off" oninput="acFilter('dp-ship','dpship-ac',SHIP_LIST)"/><div class="ac-list" id="dpship-ac"></div></div>
+        <div class="fgg ac-wrap"><label>Ship Lost</label><input id="dp-ship" placeholder="Your ship..." autocomplete="off" oninput="acFilter('dp-ship','dpship-ac',SHIP_LIST,shipMaker)"/><div class="ac-list" id="dpship-ac"></div></div>
         <div class="fgg ac-wrap"><label>Killed By</label><input id="dp-killer" placeholder="Their handle..." autocomplete="off" oninput="acFilter('dp-killer','dpkill-ac',playerNames())"/><div class="ac-list" id="dpkill-ac"></div></div>
-        <div class="fgg ac-wrap"><label>Their Ship</label><input id="dp-killerShip" placeholder="e.g. Gladius..." autocomplete="off" oninput="acFilter('dp-killerShip','dpkship-ac',SHIP_LIST)"/><div class="ac-list" id="dpkship-ac"></div></div>
+        <div class="fgg ac-wrap"><label>Their Ship</label><input id="dp-killerShip" placeholder="e.g. Gladius..." autocomplete="off" oninput="acFilter('dp-killerShip','dpkship-ac',SHIP_LIST,shipMaker)"/><div class="ac-list" id="dpkship-ac"></div></div>
         <div class="fgg ac-wrap"><label>Location</label><input id="dp-loc" placeholder="System / area..." autocomplete="off" onfocus="acFocus('dp-loc','dp-loc-ac',LOCATIONS)" oninput="acFilter('dp-loc','dp-loc-ac',LOCATIONS)"/><div class="ac-list" id="dp-loc-ac"></div></div>
         <div class="fgg full"><label>Notes</label><textarea id="dp-notes" style="min-height:48px"></textarea></div>
       </div>
@@ -222,9 +228,9 @@
     </div>
     <div id="d-pveship-fields" style="display:none">
       <div class="fg">
-        <div class="fgg ac-wrap"><label>Ship Lost</label><input id="dve-ship" placeholder="Your ship..." autocomplete="off" oninput="acFilter('dve-ship','dveship-ac2',SHIP_LIST)"/><div class="ac-list" id="dveship-ac2"></div></div>
+        <div class="fgg ac-wrap"><label>Ship Lost</label><input id="dve-ship" placeholder="Your ship..." autocomplete="off" oninput="acFilter('dve-ship','dveship-ac2',SHIP_LIST,shipMaker)"/><div class="ac-list" id="dveship-ac2"></div></div>
         <div class="fgg"><label>Enemy Type</label><input id="dve-enemy" placeholder="e.g. Vanduul, NPC pirate..."/></div>
-        <div class="fgg ac-wrap"><label>Enemy Ship</label><input id="dve-enemyship" placeholder="e.g. Scythe..." autocomplete="off" oninput="acFilter('dve-enemyship','dveeship-ac',SHIP_LIST)"/><div class="ac-list" id="dveeship-ac"></div></div>
+        <div class="fgg ac-wrap"><label>Enemy Ship</label><input id="dve-enemyship" placeholder="e.g. Scythe..." autocomplete="off" oninput="acFilter('dve-enemyship','dveeship-ac',SHIP_LIST,shipMaker)"/><div class="ac-list" id="dveeship-ac"></div></div>
         <div class="fgg ac-wrap"><label>Location</label><input id="dve-loc" placeholder="System / area..." autocomplete="off" onfocus="acFocus('dve-loc','dve-loc-ac',LOCATIONS)" oninput="acFilter('dve-loc','dve-loc-ac',LOCATIONS)"/><div class="ac-list" id="dve-loc-ac"></div></div>
         <div class="fgg full"><label>Notes</label><textarea id="dve-notes" style="min-height:48px"></textarea></div>
       </div>
@@ -239,7 +245,7 @@
     </div>
     <div id="d-crash-fields" style="display:none">
       <div class="fg">
-        <div class="fgg ac-wrap"><label>Ship Lost</label><input id="dc-ship" placeholder="Your ship..." autocomplete="off" oninput="acFilter('dc-ship','dcship-ac',SHIP_LIST)"/><div class="ac-list" id="dcship-ac"></div></div>
+        <div class="fgg ac-wrap"><label>Ship Lost</label><input id="dc-ship" placeholder="Your ship..." autocomplete="off" oninput="acFilter('dc-ship','dcship-ac',SHIP_LIST,shipMaker)"/><div class="ac-list" id="dcship-ac"></div></div>
         <div class="fgg"><label>What You Hit</label><input id="dc-hit" placeholder="e.g. terrain, station..."/></div>
         <div class="fgg ac-wrap"><label>Location</label><input id="dc-loc" placeholder="System / area..." autocomplete="off" onfocus="acFocus('dc-loc','dc-loc-ac',LOCATIONS)" oninput="acFilter('dc-loc','dc-loc-ac',LOCATIONS)"/><div class="ac-list" id="dc-loc-ac"></div></div>
         <div class="fgg full"><label>Notes</label><textarea id="dc-notes" style="min-height:48px"></textarea></div>
@@ -247,7 +253,7 @@
     </div>
     <div id="d-env-fields" style="display:none">
       <div class="fg">
-        <div class="fgg ac-wrap"><label>Ship Lost</label><input id="de-ship" placeholder="Your ship..." autocomplete="off" oninput="acFilter('de-ship','deship-ac',SHIP_LIST)"/><div class="ac-list" id="deship-ac"></div></div>
+        <div class="fgg ac-wrap"><label>Ship Lost</label><input id="de-ship" placeholder="Your ship..." autocomplete="off" oninput="acFilter('de-ship','deship-ac',SHIP_LIST,shipMaker)"/><div class="ac-list" id="deship-ac"></div></div>
         <div class="fgg"><label>Hazard Type</label><select id="de-hazard"><option value="star">Star / Radiation</option><option value="atmosphere">Atmosphere</option><option value="quantum">Quantum Crash</option><option value="explosive">Explosion</option><option value="suffocation">Suffocation</option><option value="other">Other</option></select></div>
         <div class="fgg ac-wrap"><label>Location</label><input id="de-loc" placeholder="System / area..." autocomplete="off" onfocus="acFocus('de-loc','de-loc-ac',LOCATIONS)" oninput="acFilter('de-loc','de-loc-ac',LOCATIONS)"/><div class="ac-list" id="de-loc-ac"></div></div>
         <div class="fgg full"><label>Notes</label><textarea id="de-notes" style="min-height:48px"></textarea></div>
@@ -255,7 +261,7 @@
     </div>
     <div id="d-bugcig-fields" style="display:none">
       <div class="fg">
-        <div class="fgg ac-wrap"><label>Ship Lost (if any)</label><input id="db-ship" placeholder="Your ship..." autocomplete="off" oninput="acFilter('db-ship','dbship-ac',SHIP_LIST)"/><div class="ac-list" id="dbship-ac"></div></div>
+        <div class="fgg ac-wrap"><label>Ship Lost (if any)</label><input id="db-ship" placeholder="Your ship..." autocomplete="off" oninput="acFilter('db-ship','dbship-ac',SHIP_LIST,shipMaker)"/><div class="ac-list" id="dbship-ac"></div></div>
         <div class="fgg ac-wrap"><label>Location</label><input id="db-loc" placeholder="System / area..." autocomplete="off" onfocus="acFocus('db-loc','db-loc-ac',LOCATIONS)" oninput="acFilter('db-loc','db-loc-ac',LOCATIONS)"/><div class="ac-list" id="db-loc-ac"></div></div>
         <div class="fgg full"><label>What Happened / Blame CIG</label><textarea id="db-notes" placeholder="Describe the bug or CIG moment..." style="min-height:80px"></textarea></div>
       </div>
@@ -289,7 +295,7 @@
   <div class="fc">
     <div class="fc-title">// Log commodity trade</div>
     <div class="fg3">
-      <div class="fgg ac-wrap"><label>Commodity</label><input id="tr-commodity" placeholder="e.g. Laranite..." autocomplete="off" oninput="acFilter('tr-commodity','comm-ac',COMMODITY_LIST)"/><div class="ac-list" id="comm-ac"></div></div>
+      <div class="fgg ac-wrap"><label>Commodity</label><input id="tr-commodity" placeholder="e.g. Laranite..." autocomplete="off" oninput="acFilter('tr-commodity','comm-ac',mktCommodities(),mktCode)"/><div class="ac-list" id="comm-ac"></div></div>
       <div class="fgg"><label>Quantity (SCU)</label><input type="number" id="tr-qty" placeholder="0" min="0"/></div>
       <div class="fgg"><label>Buy Price (aUEC/SCU)</label><input type="number" id="tr-buyprice" placeholder="0" min="0"/></div>
       <div class="fgg ac-wrap"><label>Bought At</label><input id="tr-buyloc" placeholder="Station / location..." autocomplete="off" onfocus="acFocus('tr-buyloc','tr-buyloc-ac',LOCATIONS)" oninput="acFilter('tr-buyloc','tr-buyloc-ac',LOCATIONS)"/><div class="ac-list" id="tr-buyloc-ac"></div></div>
@@ -301,6 +307,34 @@
       <button class="btn-p trade" onclick="submitTrade()">Log Trade</button>
       <span style="font-family:var(--mono);font-size:11px;color:var(--mut)" id="tr-calc"></span>
     </div>
+  </div>
+  <div class="fc" id="run-card">
+    <div class="fc-title">// Best trade runs</div>
+    <div class="run-filters">
+      <div class="fgg"><label>Max cargo (SCU)</label><input type="number" id="run-cargo" min="1" placeholder="e.g. 96"/></div>
+      <div class="fgg"><label>Max spend (aUEC)</label><input type="number" id="run-spend" min="0" placeholder="No limit"/></div>
+      <div class="fgg"><label>System</label><select id="run-system"><option value="">All systems</option></select></div>
+      <div class="fgg"><label>Buy near</label><select id="run-from"><option value="">Anywhere</option></select></div>
+    </div>
+    <label class="gl-check" style="margin:8px 0 12px"><input type="checkbox" id="run-fresh" checked/> Only use prices reported in the last 7 days</label>
+    <div class="run-list" id="run-list"></div>
+  </div>
+  <div class="fc" id="mkt-card">
+    <div class="fc-title" style="display:flex;align-items:center;justify-content:space-between;gap:10px">// Market prices <span style="display:flex;align-items:center;gap:8px;letter-spacing:0;text-transform:none"><span class="gl-sub" id="mkt-status"></span><button class="btn-s" style="font-size:9px;padding:2px 8px" onclick="mktLoad(true)">Refresh</button></span></div>
+    <div class="mkt-bar">
+      <div class="fgg ac-wrap" style="flex:1"><input id="mkt-commodity" placeholder="Pick a commodity to see prices..." autocomplete="off" oninput="acFilter('mkt-commodity','mkt-ac',mktCommodities(),mktCode)" onfocus="acFocus('mkt-commodity','mkt-ac',mktCommodities(),mktCode)"/><div class="ac-list" id="mkt-ac"></div></div>
+      <div class="fgg"><select id="mkt-system" onchange="renderMarket();mktSuggest()"><option value="">All systems</option></select></div>
+    </div>
+    <div id="mkt-route"></div>
+    <div class="two-col" style="margin-bottom:12px">
+      <div><div class="gl-party-sect">Buy price history · cheapest 3</div><div class="mkt-chart" id="mkt-chart-buy"></div></div>
+      <div><div class="gl-party-sect">Sell price history · best 3</div><div class="mkt-chart" id="mkt-chart-sell"></div></div>
+    </div>
+    <div class="two-col">
+      <div><div class="gl-party-sect">Where to buy · cheapest first</div><div class="gl-list" id="mkt-buy"></div></div>
+      <div><div class="gl-party-sect">Where to sell · best first</div><div class="gl-list" id="mkt-sell"></div></div>
+    </div>
+    <div class="gl-sub" style="margin-top:10px">Prices are reported by players through <a href="https://uexcorp.space" target="_blank" style="color:var(--acc)">UEX</a>, so check how old each one is. Refreshed at most every 45 minutes.</div>
   </div>
   <div class="fc" style="padding:12px 14px">
     <div class="fc-title" style="margin-bottom:10px">// Trade log <span id="trade-count" style="color:var(--mut);font-size:10px"></span></div>
@@ -458,8 +492,8 @@
     <div class="fg3">
       <div class="fgg ac-wrap"><label>Target Name</label><input id="bq-target" placeholder="Their handle..." autocomplete="off" oninput="acFilter('bq-target','bqtarget-ac',playerNames())"/><div class="ac-list" id="bqtarget-ac"></div></div>
       <div class="fgg"><label>Bounty Value (aUEC)</label><input type="number" id="bq-value" value="100000" min="0"/></div>
-      <div class="fgg ac-wrap"><label>Their Ship</label><input id="bq-targetship" placeholder="e.g. Cutlass Black..." autocomplete="off" oninput="acFilter('bq-targetship','bqtship-ac',SHIP_LIST)"/><div class="ac-list" id="bqtship-ac"></div></div>
-      <div class="fgg ac-wrap"><label>Your Ship</label><input id="bq-yourship" placeholder="e.g. Hornet..." autocomplete="off" oninput="acFilter('bq-yourship','bqyship-ac',SHIP_LIST)"/><div class="ac-list" id="bqyship-ac"></div></div>
+      <div class="fgg ac-wrap"><label>Their Ship</label><input id="bq-targetship" placeholder="e.g. Cutlass Black..." autocomplete="off" oninput="acFilter('bq-targetship','bqtship-ac',SHIP_LIST,shipMaker)"/><div class="ac-list" id="bqtship-ac"></div></div>
+      <div class="fgg ac-wrap"><label>Your Ship</label><input id="bq-yourship" placeholder="e.g. Hornet..." autocomplete="off" oninput="acFilter('bq-yourship','bqyship-ac',SHIP_LIST,shipMaker)"/><div class="ac-list" id="bqyship-ac"></div></div>
       <div class="fgg ac-wrap"><label>Location</label><input id="bq-loc" placeholder="System / area..." autocomplete="off" onfocus="acFocus('bq-loc','bq-loc-ac',LOCATIONS)" oninput="acFilter('bq-loc','bq-loc-ac',LOCATIONS)"/><div class="ac-list" id="bq-loc-ac"></div></div>
       <div class="fgg"><label>Status</label><select id="bq-status"><option value="active">Active</option><option value="complete">Complete</option><option value="failed">Failed</option></select></div>
       <div class="fgg full"><label>Notes</label><textarea id="bq-notes" placeholder="Intel, approach, outcome..." style="min-height:48px"></textarea></div>
@@ -485,11 +519,82 @@
 </div>
 
 <!-- CAREER -->
+<!-- LIVE LOG -->
+<div id="v-live" style="display:none">
+  <div class="fc gl-status-card">
+    <div class="gl-status-row">
+      <span class="gl-dot" id="gl-dot"></span>
+      <span class="gl-status-text" id="gl-status-text">Game log watcher off</span>
+      <span class="gl-path" id="gl-path"></span>
+      <span style="flex:1"></span>
+      <button class="btn-s" onclick="glToggle()" id="gl-toggle-btn">Start</button>
+      <button class="btn-s" onclick="openSettings();showSettingsTab('gamelog')">Configure</button>
+    </div>
+  </div>
+  <div class="stat-cards">
+    <div class="stat-card"><div class="sc-val" style="color:var(--grn)" id="gl-sess-earn">0</div><div class="sc-lbl">Session Payouts</div></div>
+    <div class="stat-card"><div class="sc-val" style="color:var(--red)" id="gl-sess-spend">0</div><div class="sc-lbl">Session Spent</div></div>
+    <div class="stat-card"><div class="sc-val" id="gl-sess-done">0</div><div class="sc-lbl">Session Contracts</div></div>
+    <div class="stat-card"><div class="sc-val" style="color:var(--grn)" id="gl-all-earn">0</div><div class="sc-lbl">Logged Payouts</div></div>
+    <div class="stat-card"><div class="sc-val" style="color:var(--red)" id="gl-all-spend">0</div><div class="sc-lbl">Shop Spending</div></div>
+    <div class="stat-card"><div class="sc-val" id="gl-all-rate">-</div><div class="sc-lbl">Success Rate</div></div>
+  </div>
+  <div class="fc">
+    <div class="fc-title">// Current session</div>
+    <div class="gl-session-grid">
+      <div class="ditem"><span class="dlabel">Handle</span><span class="dval" id="gl-s-handle">-</span></div>
+      <div class="ditem"><span class="dlabel">Server</span><span class="dval" id="gl-s-shard">-</span></div>
+      <div class="ditem"><span class="dlabel">Ship</span><span class="dval" id="gl-s-ship">-</span></div>
+      <div class="ditem"><span class="dlabel">Jurisdiction</span><span class="dval" id="gl-s-jur">-</span></div>
+      <div class="ditem"><span class="dlabel">Last Location</span><span class="dval" id="gl-s-loc">-</span></div>
+      <div class="ditem"><span class="dlabel">Zone</span><span class="dval" id="gl-s-zone">-</span></div>
+      <div class="ditem full"><span class="dlabel">Party</span><span class="dval" id="gl-s-party">-</span></div>
+    </div>
+  </div>
+  <div class="two-col">
+    <div class="fc" style="padding:12px 14px">
+      <div class="fc-title" style="margin-bottom:10px;display:flex;align-items:center;justify-content:space-between">// Contracts <span id="gl-contract-count" style="color:var(--mut);font-size:10px"></span></div>
+      <div class="sort-row">
+        <span style="font-family:var(--mono);font-size:10px;color:var(--mut);letter-spacing:1px">SHOW:</span>
+        <button class="sort-btn active" id="glf-all" onclick="setGlFilter('all')">All</button>
+        <button class="sort-btn" id="glf-active" onclick="setGlFilter('active')">Active</button>
+        <button class="sort-btn" id="glf-complete" onclick="setGlFilter('complete')">Complete</button>
+        <button class="sort-btn" id="glf-failed" onclick="setGlFilter('failed')">Failed</button>
+      </div>
+      <div class="gl-list" id="gl-contracts"></div>
+    </div>
+    <div class="fc" style="padding:12px 14px">
+      <div class="fc-title" style="margin-bottom:10px;display:flex;align-items:center;justify-content:space-between">// Players seen this session <span id="gl-seen-count" style="color:var(--mut);font-size:10px"></span></div>
+      <div class="gl-list" id="gl-seen"></div>
+    </div>
+  </div>
+  <div class="two-col">
+    <div class="fc" style="padding:12px 14px">
+      <div class="fc-title" style="margin-bottom:10px">// Current party</div>
+      <div id="gl-party"></div>
+    </div>
+    <div class="fc" style="padding:12px 14px">
+      <div class="fc-title" style="margin-bottom:10px;display:flex;align-items:center;justify-content:space-between">// Past parties <span id="gl-parties-count" style="color:var(--mut);font-size:10px"></span></div>
+      <div class="gl-list" id="gl-parties"></div>
+    </div>
+  </div>
+  <div class="two-col">
+    <div class="fc" style="padding:12px 14px">
+      <div class="fc-title" style="margin-bottom:10px">// Purchases</div>
+      <div class="gl-list" id="gl-purchases"></div>
+    </div>
+    <div class="fc" style="padding:12px 14px">
+      <div class="fc-title" style="margin-bottom:10px;display:flex;align-items:center;justify-content:space-between">// Live feed <button class="btn-d" style="font-size:10px;padding:2px 8px" onclick="glClearFeed()">Clear</button></div>
+      <div class="gl-list" id="gl-feed"></div>
+    </div>
+  </div>
+</div>
+
 <div id="v-career" style="display:none">
   <div class="stat-cards">
     <div class="stat-card"><div class="sc-val sc-kills" id="ca-kills">0</div><div class="sc-lbl">Total Kills</div></div>
     <div class="stat-card"><div class="sc-val sc-deaths" id="ca-deaths">0</div><div class="sc-lbl">Deaths</div></div>
-    <div class="stat-card"><div class="sc-val sc-kd" id="ca-kd">0.00</div><div class="sc-lbl">K/D Ratio</div></div>
+    <div class="stat-card"><div class="sc-val sc-kd" id="ca-kd">0.00</div><div class="sc-lbl" title="Player kills ÷ deaths caused by players">PvP K/D Ratio</div></div>
     <div class="stat-card"><div class="sc-val sc-caps" id="ca-caps">0</div><div class="sc-lbl">Captures</div></div>
     <div class="stat-card"><div class="sc-val sc-profit" id="ca-profit">0</div><div class="sc-lbl">Total Profit</div></div>
   </div>
@@ -587,6 +692,8 @@
         <button class="settings-nav-btn active" onclick="showSettingsTab('identity')">Identity</button>
         <button class="settings-nav-btn" onclick="showSettingsTab('presets')">Faction Presets</button>
         <button class="settings-nav-btn" onclick="showSettingsTab('custom')">Custom Theme</button>
+        <button class="settings-nav-btn" onclick="showSettingsTab('gamelog')">Game Log</button>
+        <button class="settings-nav-btn" onclick="showSettingsTab('data')">Data</button>
       </div>
       <div class="settings-content">
         <div class="settings-section active" id="st-identity">
@@ -640,6 +747,28 @@
           <div class="settings-section-title">Faction Presets</div>
           <div class="preset-grid" id="preset-grid"></div>
         </div>
+        <div class="settings-section" id="st-gamelog">
+          <div class="settings-section-title">Game Log</div>
+          <div class="fg" style="gap:10px">
+            <div class="fgg"><label>Game.log Path</label><input id="set-gl-path" placeholder="Leave blank to auto-detect..."/></div>
+            <div style="display:flex;gap:8px">
+              <button class="btn-s" style="font-size:10px" onclick="glBrowse()">Browse...</button>
+              <button class="btn-s" style="font-size:10px" onclick="glDetect()">Auto-detect</button>
+            </div>
+            <label class="gl-check"><input type="checkbox" id="set-gl-enabled"/> Watch the game log when the app starts</label>
+          </div>
+          <div class="gl-note">The watcher only reads Game.log. It never touches the game process. Contracts, aUEC payouts, shop purchases and player bounties are recorded automatically, and contacts in your Players tab are flagged when the log shows them near you (party, trains and transit, close by). Kills and deaths are no longer written to the log by the game, so keep logging those by hand.</div>
+        </div>
+        <div class="settings-section" id="st-data">
+          <div class="settings-section-title">Data</div>
+          <div id="data-info" style="font-family:var(--mono);font-size:11px;color:var(--mut);line-height:1.8;word-break:break-all"></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+            <button class="btn-s" style="font-size:10px" onclick="dataOpenFolder()">Open data folder</button>
+            <button class="btn-s" style="font-size:10px" onclick="dataExport()">Export backup...</button>
+            <button class="btn-s" style="font-size:10px" onclick="dataImport()">Import backup...</button>
+          </div>
+          <div class="gl-note">Everything is saved to the file above the moment you log it. The save before the latest one is kept next to it, the first save of each day is copied into the backups folder (last 14 days kept), and a file that can't be read is set aside instead of being overwritten. Only one copy of the app can run at a time.</div>
+        </div>
         <div class="settings-section" id="st-custom">
           <div class="settings-section-title">Custom Theme</div>
           <div style="margin-bottom:14px">
@@ -672,6 +801,7 @@
 
 <div class="toast" id="toast"></div>
 
+<script src="tauri-bridge.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

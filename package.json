@@ -1,13 +1,14 @@
 {
   "name": "sc-captains-log",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "Electron-based activity tracker and captain's log for Star Citizen organisations",
   "main": "main.js",
   "author": "The Vengeful Teapot",
   "scripts": {
     "start": "electron .",
     "build-win": "electron-builder --win",
-    "build-portable": "electron-builder --win portable"
+    "build-portable": "electron-builder --win portable",
+    "build-native": "cd native/core && cargo build --release && cp target/release/cl_native.dll ../cl_native.node"
   },
   "build": {
     "appId": "com.sc.captainslog",
@@ -16,6 +17,9 @@
     "directories": {
       "output": "dist"
     },
+    "asarUnpack": [
+      "native/*.node"
+    ],
     "win": {
       "target": [
         {
@@ -50,11 +54,17 @@
     "files": [
       "main.js",
       "preload.js",
+      "gamelog.js",
+      "rsi.js",
+      "market.js",
+      "store.js",
+      "native/*.node",
       "src/**/*",
       "assets/**/*"
     ]
   },
   "devDependencies": {
+    "@tauri-apps/cli": "^2.12.4",
     "electron": "^28.0.0",
     "electron-builder": "^24.0.0"
   }

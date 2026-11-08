@@ -32,3 +32,12 @@ yarn-error.log*
 Thumbs.db
 .vscode/
 .idea/
+
+# Local installer test builds
+dist-*/
+
+# Rust build output (native module and Tauri app)
+native/core/target/
+native/*.node
+src-tauri/target/
+src-tauri/gen/
